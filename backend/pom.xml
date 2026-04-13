@@ -16,7 +16,7 @@
     <packaging>jar</packaging>
 
     <name>TaskFlow API</name>
-    <description>Production-ready Task Management Backend with Firebase Auth & PostgreSQL</description>
+    <description>Production-ready Task Management Backend with Firebase Auth &amp; PostgreSQL</description>
 
     <properties>
         <java.version>17</java.version>
@@ -57,7 +57,7 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+#
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
