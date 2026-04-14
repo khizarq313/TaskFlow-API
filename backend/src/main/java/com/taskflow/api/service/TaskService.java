@@ -239,4 +239,37 @@ public class TaskService {
         return taskRepository.findByIdAndOwner(taskId, owner)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", taskId));
     }
+
+    @Transactional
+    public TaskResponse updateTaskStatus(User owner, Long taskId, String status) {
+        Task task = findOwnedTask(owner, taskId);
+
+        TaskStatus oldStatus = task.getStatus();
+
+        TaskStatus newStatus;
+        try {
+            newStatus = TaskStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status: " + status);
+        }
+
+        task.setStatus(newStatus);
+        Task updated = taskRepository.save(task);
+
+        // Optional: add system comment
+        if (oldStatus != newStatus) {
+            Comment systemComment = Comment.builder()
+                    .content(String.format("Status changed from %s to %s", oldStatus, newStatus))
+                    .authorName("System")
+                    .isSystemMessage(true)
+                    .task(updated)
+                    .build();
+            commentRepository.save(systemComment);
+        }
+
+        log.info("Task status updated: id={}, status={}, owner={}",
+                taskId, newStatus, owner.getEmail());
+
+        return TaskResponse.fromEntity(updated);
+    }
 }

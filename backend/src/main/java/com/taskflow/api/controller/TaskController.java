@@ -99,4 +99,18 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(taskService.addComment(user, id, request));
     }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Update task status", description = "Updates only the status of a task")
+    public ResponseEntity<TaskResponse> updateTaskStatus(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
+            @RequestBody java.util.Map<String, String> body
+    ) {
+        String status = body.get("status");
+
+        TaskResponse updated = taskService.updateTaskStatus(user, id, status);
+
+        return ResponseEntity.ok(updated);
+    }
 }
