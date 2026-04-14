@@ -21,8 +21,6 @@ const App: React.FC = () => {
     );
   }
 
-  console.log("API URL:", import.meta.env.VITE_API_URL);
-
   return (
     <BrowserRouter>
       <Routes>

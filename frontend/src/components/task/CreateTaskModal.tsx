@@ -3,6 +3,9 @@ import { TaskRequest, TaskStatus, TaskPriority } from '../../types/task';
 import { useTasks } from '../../hooks/useTasks';
 import { useProjects } from '../../hooks/useProjects';
 import Button from '../ui/Button';
+import InputField from '../ui/InputField';
+import SelectField from '../ui/SelectField';
+import TextAreaField from '../ui/TextAreaField';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -13,6 +16,9 @@ interface CreateTaskModalProps {
 
 const PRIORITIES: TaskPriority[] = [TaskPriority.LOW, TaskPriority.MEDIUM, TaskPriority.HIGH, TaskPriority.URGENT];
 const STATUSES: TaskStatus[] = [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE];
+
+const priorityOptions = PRIORITIES.map(p => ({ value: p, label: p.charAt(0) + p.slice(1).toLowerCase() }));
+const statusOptions = STATUSES.map(s => ({ value: s, label: s.replace('_', ' ').split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ') }));
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   isOpen,
@@ -106,91 +112,111 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
 
   if (!isOpen) return null;
 
+  const projectOptions = [
+    { value: '', label: 'No Project' },
+    ...projects.map(p => ({ value: p.id, label: p.name }))
+  ];
+
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={handleCancel}
     >
       <div
-        className="w-full max-w-lg bg-surface-container-low rounded-xl relative overflow-hidden"
+        className="w-full max-w-lg bg-surface-container-low rounded-xl atmospheric-shadow relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative p-6 space-y-5">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-white">Create Task</h2>
-            <button onClick={handleCancel}>✕</button>
+        {/* Subtle overlay effect */}
+        <div className="absolute inset-0 bg-surface-variant/5 pointer-events-none" />
+
+        <div className="relative p-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-headline text-2xl font-bold text-white">Create Task</h2>
+            <button
+              onClick={handleCancel}
+              className="text-outline hover:text-white transition-colors"
+              aria-label="Close modal"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Task Title */}
+            <InputField
+              label="Task Title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Task title"
-              className="w-full px-3 py-2 rounded"
+              placeholder="Enter task title"
+              required
+              autoFocus
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <select
+            {/* Priority and Status Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <SelectField
+                label="Priority"
                 value={priority}
-                onChange={(e) =>
-                  setPriority(e.target.value as TaskPriority)
-                }
-              >
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                options={priorityOptions}
+              />
 
-              <select
+              <SelectField
+                label="Status"
                 value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value as TaskStatus)
-                }
-              >
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => setStatus(e.target.value as TaskStatus)}
+                options={statusOptions}
+              />
+            </div>
 
-              <input
+            {/* Due Date and Project Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <InputField
+                label="Due Date"
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
               />
 
-              <select
+              <SelectField
+                label="Project"
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
-              >
-                <option value="">No Project</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+                options={projectOptions}
+              />
             </div>
 
-            <textarea
+            {/* Description */}
+            <TextAreaField
+              label="Description (Optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
-              className="w-full px-3 py-2 rounded"
+              placeholder="Describe your task..."
+              rows={3}
             />
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {/* Error Message */}
+            {error && (
+              <div className="text-error text-sm text-center bg-error/10 rounded-md py-2">
+                {error}
+              </div>
+            )}
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" onClick={handleCancel}>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 mt-8">
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
-              <Button type="submit" isLoading={isLoading}>
-                Create
+              <Button variant="primary" type="submit" isLoading={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Task'}
               </Button>
             </div>
           </form>

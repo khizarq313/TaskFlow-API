@@ -73,8 +73,8 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities }) => {
       <h3 className="font-headline font-bold text-lg text-white mb-6">Recent Activity</h3>
 
       <div className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex gap-3 items-start">
+        {activities.map((activity, index) => (
+          <div key={`${activity.timestamp}-${index}`} className="flex gap-3 items-start">
             <div className="flex-shrink-0">
               <Avatar src={null} alt={activity.userName} size="sm" />
             </div>
